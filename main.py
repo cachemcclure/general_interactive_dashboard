@@ -5,7 +5,7 @@
 
 ## Import Modules
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from pyqtgraph.dockarea import *
 from sqlalchemy import create_engine
 import pandas as pd
@@ -44,10 +44,6 @@ class mainWindow(QMainWindow):
         layout = QtWidgets.QVBoxLayout(self)
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
-        
-        ## Read Master SQL Query
-        with open('master_query.sql') as f:
-            self.sql = f.read()
 
         ## Dock Area
         dock_area = DockArea(self)
@@ -144,9 +140,33 @@ class mainWindow(QMainWindow):
     
 
     def retData(self):
-        ## insert fx to read from csv with polars, format data, and extract dtypes
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        filename,_ = QFileDialog.getOpenFileName(self,"Choose data file","","All Files (*)",options=options)
+        print(filename)
+        if filename:
+            self.rawdf = self.readData(filename)
         return
     
+    
+    def readData(self,filename):
+        with open(filename,'r') as f:
+            temp = f.read()
+        first_line = temp[:temp.find('\n')]
+        common_delim = ['\t',',','|']
+        separator = ''
+        no_cols = 1
+        for delim in common_delim:
+            sep_ct = first_line.count(delim)
+            if (sep_ct + 1) > no_cols:
+                separator = delim 
+                no_cols = sep_ct + 1
+        del temp
+        if no_cols == 1:
+            raise Exception('Delimiter cannot be determined')
+        self.rawdf = pl.scan_csv(filename,separator=separator)
+        return
+
 
     def updateFilters(self):
         self.filters['storefront_name'] = self.widget_one.storefront_filter.currentText()
