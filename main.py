@@ -103,15 +103,15 @@ class mainWindow(QMainWindow):
         self.widget_one.endDate_filter.dateChanged.connect(self.onEndDateChanged)
 
         ## Connect Filters to Fx
-        self.widget_one.storefront_filter.activated.connect(self.updateFilters)
-        self.widget_one.partner_filter.activated.connect(self.updateFilters)
-        self.widget_one.brand_filter.activated.connect(self.updateFilters)
-        self.widget_one.category_filter.activated.connect(self.updateFilters)
-        self.widget_one.type_filter.activated.connect(self.updateFilters)
-        self.widget_one.subType_filter.activated.connect(self.updateFilters)
-        self.widget_one.orderType_filter.activated.connect(self.updateFilters)
-        self.widget_one.status_filter.activated.connect(self.updateFilters)
-        self.widget_one.province_filter.activated.connect(self.updateFilters)
+        #self.widget_one.storefront_filter.activated.connect(self.updateFilters)
+        #self.widget_one.partner_filter.activated.connect(self.updateFilters)
+        #self.widget_one.brand_filter.activated.connect(self.updateFilters)
+        #self.widget_one.category_filter.activated.connect(self.updateFilters)
+        #self.widget_one.type_filter.activated.connect(self.updateFilters)
+        #self.widget_one.subType_filter.activated.connect(self.updateFilters)
+        #self.widget_one.orderType_filter.activated.connect(self.updateFilters)
+        #self.widget_one.status_filter.activated.connect(self.updateFilters)
+        #self.widget_one.province_filter.activated.connect(self.updateFilters)
 
         ## Connect Reset Filters button to Fx 
         self.widget_one.reset_b.clicked.connect(self.resetFilters)
@@ -449,11 +449,9 @@ class FilterWidget(QtWidgets.QWidget):
         vis_label = QtWidgets.QLabel()
         vis_label.setText('Report Type')
         self.vis_type = QtWidgets.QComboBox()
-        self.vis_type.addItems(['Revenue',
-                                   'Orders',
-                                   'AOV',
-                                   'Bottles',
-                                   'Customers'])
+        self.vis_type.addItems(['Time-series',
+                                'Pie Chart',
+                                'Bar Chart'])
 
         ## Filters
         self.filter_one = QtWidgets.QComboBox()
@@ -542,30 +540,30 @@ class FilterWidget(QtWidgets.QWidget):
         layout.addWidget(self.filter_ten)
         
         ## Hide Filters and Labels at Init
-        self.startDate_label.isVisible(False)
-        self.startDate_filter.isVisible(False)
-        self.endDate_label.isVisible(False)
-        self.endDate_filter.isVisible(False)
-        self.label_one.isVisible(False)
-        self.filter_one.isVisible(False)
-        self.label_two.isVisible(False)
-        self.filter_two.isVisible(False)
-        self.label_three.isVisible(False)
-        self.filter_three.isVisible(False)
-        self.label_four.isVisible(False)
-        self.filter_four.isVisible(False)
-        self.label_five.isVisible(False)
-        self.filter_five.isVisible(False)
-        self.label_six.isVisible(False)
-        self.filter_six.isVisible(False)
-        self.label_seven.isVisible(False)
-        self.filter_seven.isVisible(False)
-        self.label_eight.isVisible(False)
-        self.filter_eight.isVisible(False)
-        self.label_nine.isVisible(False)
-        self.filter_nine.isVisible(False)
-        self.label_ten.isVisible(False)
-        self.filter_ten.isVisible(False)
+        self.startDate_label.setVisible(False)
+        self.startDate_filter.setVisible(False)
+        self.endDate_label.setVisible(False)
+        self.endDate_filter.setVisible(False)
+        self.label_one.setVisible(False)
+        self.filter_one.setVisible(False)
+        self.label_two.setVisible(False)
+        self.filter_two.setVisible(False)
+        self.label_three.setVisible(False)
+        self.filter_three.setVisible(False)
+        self.label_four.setVisible(False)
+        self.filter_four.setVisible(False)
+        self.label_five.setVisible(False)
+        self.filter_five.setVisible(False)
+        self.label_six.setVisible(False)
+        self.filter_six.setVisible(False)
+        self.label_seven.setVisible(False)
+        self.filter_seven.setVisible(False)
+        self.label_eight.setVisible(False)
+        self.filter_eight.setVisible(False)
+        self.label_nine.setVisible(False)
+        self.filter_nine.setVisible(False)
+        self.label_ten.setVisible(False)
+        self.filter_ten.setVisible(False)
         
         
     def set_filter_vis_labd(self,
