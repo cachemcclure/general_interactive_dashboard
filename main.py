@@ -117,18 +117,18 @@ class mainWindow(QMainWindow):
         self.widget_one.reset_b.clicked.connect(self.resetFilters)
 
         ## Set Initial Filters
-        self.filters = {'report':'Revenue',
-                        'storefront_name':'All',
-                        'partner':'All',
-                        'brand':'All',
-                        'product_category':'All',
-                        'product_type':'All',
-                        'product_subtype':'All',
-                        'order_type':'All',
-                        'order_status':'All',
-                        'province':'All',
-                        'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
-                        'end_date':datetime.today().strftime('%Y-%m-%d')}
+#        self.filters = {'report':'Revenue',
+#                        'storefront_name':'All',
+#                        'partner':'All',
+#                        'brand':'All',
+#                        'product_category':'All',
+#                        'product_type':'All',
+#                        'product_subtype':'All',
+#                        'order_type':'All',
+#                        'order_status':'All',
+#                        'province':'All',
+#                        'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
+#                        'end_date':datetime.today().strftime('%Y-%m-%d')}
     
 
     def onStartDateChanged(self,newDate):
@@ -146,6 +146,7 @@ class mainWindow(QMainWindow):
         print(filename)
         if filename:
             self.rawdf = self.readData(filename)
+            ## TODO: add function to define dimensions (sep time fields) vs measures
         return
     
     
