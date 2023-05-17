@@ -149,6 +149,15 @@ class mainWindow(QMainWindow):
             ## TODO: add function to define dimensions (sep time fields) vs measures
         return
     
+
+    def set_dims_mets(self):
+        self.dimensions = []
+        self.metrics = []
+        self.datetimes = []
+        ## TODO: add regex to find datetime fields
+        ## TODO: add count distinct fx to separate dimensions from metrics
+        return
+    
     
     def readData(self,filename):
         with open(filename,'r') as f:
