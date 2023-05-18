@@ -15,6 +15,7 @@ from pickle import dump as pdump
 import plotly.express as px
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import re
 from os.path import exists
 import sys
 
@@ -146,7 +147,7 @@ class mainWindow(QMainWindow):
         print(filename)
         if filename:
             self.rawdf = self.readData(filename)
-            ## TODO: add function to define dimensions (sep time fields) vs measures
+            self.set_dims_mets()
         return
     
 
@@ -154,8 +155,39 @@ class mainWindow(QMainWindow):
         self.dimensions = []
         self.metrics = []
         self.datetimes = []
-        ## TODO: add regex to find datetime fields
-        ## TODO: add count distinct fx to separate dimensions from metrics
+        ## Date matching pattern:
+        ## r'(?:\d{1,2}[-/th|st|nd|rd\s]*)?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?[a-z\s,.]*(?:\d{1,2}[-/th|st|nd|rd)\s,]*)+(?:\d{2,4})+'
+        ## Basic time matching pattern:
+        ## r'\s(\d{2}\:\d{2}\s?(?:AM|PM|am|pm))'
+        ## Other time matching pattern:
+        ## '((T?)(\d{2}\:\d{2}\:\d{2})(\.\d{,3})?\s?(?:Z|AM|PM|am|pm))?'
+        date_pattern = r'(?:\d{1,2}[-/th|st|nd|rd\s]*)?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?[a-z\s,.]*(?:\d{1,2}[-/th|st|nd|rd)\s,]*)+'
+        dim_types = [pl.Utf8,
+                     pl.Boolean,
+                     pl.Binary,
+                     pl.Categorical]
+        met_types = [pl.Float32,
+                     pl.Float64]
+        unk_types = [pl.Int8,
+                     pl.Int16,
+                     pl.Int32,
+                     pl.Int64,
+                     pl.UInt8,
+                     pl.UInt16,
+                     pl.UInt32,
+                     pl.UInt64,
+                     pl.Unknown,
+                     pl.Object]
+        for col in self.rawdf.columns:
+            if self.rawdf.select(col).dtypes[0] == pl.Utf8:
+                temp = self.rawdf.select(col).filter(~pl.col(col).is_null()).limit(1).collect().item()
+                if re.match(regex,temp):
+                    self.datetimes += [col]
+                else:
+                    self.dimensions += [col]
+            elif (self.rawdf.select(col).dtypes[0] == pl.Float32) \
+                or (self.rawdf.select(col).dtypes[0] == pl.Float64):
+                self.metrics += [col]
         return
     
     
