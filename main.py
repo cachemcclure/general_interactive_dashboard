@@ -140,23 +140,41 @@ class mainWindow(QMainWindow):
     def onEndDateChanged(self,newDate):
         self.filters['end_date'] = newDate.toString("yyyy-MM-dd")
     
+    
+    def onDateChange(self,
+                     field:str,
+                     newDate):
+        self.filters[field] = newDate.toString("yyy-MM-dd")
+    
 
     def retData(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         filename,_ = QFileDialog.getOpenFileName(self,"Choose data file","","All Files (*)",options=options)
-        print(filename)
         if filename:
-            self.rawdf = self.readData(filename)
-            self.set_dims_mets()
+            self.readData(filename)
+            self.setDimsMets()
+            self.setFilters()
+            print(self.dimensions)
+            print(self.metrics)
+            print(self.datetimes)
+        return
+    
+    
+    def setFilters(self):
+        self.filters = {}
+        for dim in self.dimensions:
+            self.filters[dim] = ['All']
+            self.filters[dim] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
+        for field in self.datetimes:
+            self.filters[field] = datetime.today().strftime('%Y-%m-%d')
         return
     
 
-    def set_dims_mets(self):
+    def setDimsMets(self):
         self.dimensions = []
         self.metrics = []
         self.datetimes = []
-        self.unknowns = []
         row_count = self.rawdf.select(pl.count()).collect().item()
         dim_types = [pl.Boolean,
                      pl.Binary,
@@ -190,9 +208,11 @@ class mainWindow(QMainWindow):
             elif col_type in met_types:
                 self.metrics += [col]
             else:
-                ## TODO: add function to compare number of unique values to total row count
-                ## If countdistinct > 0.75 * row_count then metric else dimension
-                self.unknowns += [col]
+                item_count = self.rawdf.select(pl.col(col)).collect().n_unique()
+                if (item_count/row_count) > 0.1:
+                    self.metrics += [col]
+                else:
+                    self.dimensions += [col]
         self.pldf = self.rawdf.collect().select([pl.col(column) for column in self.dimensions]+\
             [pl.col(column) for column in self.metrics]+\
             [pl.col(column).str.strptime(pl.Datetime) for column in self.datetimes])
@@ -214,7 +234,8 @@ class mainWindow(QMainWindow):
         del temp
         if no_cols == 1:
             raise Exception('Delimiter cannot be determined')
-        self.rawdf = pl.scan_csv(filename,separator=separator)
+        self.rawdf = pl.scan_csv(source=filename,separator=separator)
+        #print(self.rawdf.select(pl.count()).collect().item())
         return
 
 
