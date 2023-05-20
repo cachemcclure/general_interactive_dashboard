@@ -190,14 +190,15 @@ class mainWindow(QMainWindow):
         self.filters = {'dimensions':[],
                         'metrics':[],
                         'datetime':[]}
+        iter = 1
         for dim in self.dimensions:
-            self.filters['dimensions'] += {'col_name':dim,
-                                           'filter_name':'',
-                                           'label_name':'',
-                                           'filter':['All']}
-            self.filters[dim] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
+            self.filters['dimensions'][dim] = {'filter_name':self.filter_defs[iter],
+                                               'label_name':self.label_defs[iter],
+                                               'filter':['All']}
+            iter += 1
+            self.filters['dimensions'][dim]['filter'] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
         for field in self.datetimes:
-            self.filters[field] = datetime.today().strftime('%Y-%m-%d')
+            self.filters['datetime'][field] = {'filter':datetime.today().strftime('%Y-%m-%d')}
         return
     
 
