@@ -15,6 +15,7 @@ from pickle import dump as pdump
 import plotly.express as px
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import dateutil.parser as parser
 import re
 from os.path import exists
 import sys
@@ -155,39 +156,46 @@ class mainWindow(QMainWindow):
         self.dimensions = []
         self.metrics = []
         self.datetimes = []
-        ## Date matching pattern:
-        ## r'(?:\d{1,2}[-/th|st|nd|rd\s]*)?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?[a-z\s,.]*(?:\d{1,2}[-/th|st|nd|rd)\s,]*)+(?:\d{2,4})+'
-        ## Basic time matching pattern:
-        ## r'\s(\d{2}\:\d{2}\s?(?:AM|PM|am|pm))'
-        ## Other time matching pattern:
-        ## '((T?)(\d{2}\:\d{2}\:\d{2})(\.\d{,3})?\s?(?:Z|AM|PM|am|pm))?'
-        date_pattern = r'(?:\d{1,2}[-/th|st|nd|rd\s]*)?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?[a-z\s,.]*(?:\d{1,2}[-/th|st|nd|rd)\s,]*)+'
-        dim_types = [pl.Utf8,
-                     pl.Boolean,
+        self.unknowns = []
+        row_count = self.rawdf.select(pl.count()).collect().item()
+        dim_types = [pl.Boolean,
                      pl.Binary,
                      pl.Categorical]
         met_types = [pl.Float32,
                      pl.Float64]
-        unk_types = [pl.Int8,
+        num_types = [pl.Int8,
                      pl.Int16,
                      pl.Int32,
                      pl.Int64,
                      pl.UInt8,
                      pl.UInt16,
                      pl.UInt32,
-                     pl.UInt64,
-                     pl.Unknown,
+                     pl.UInt64]
+        unk_types = [pl.Unknown,
                      pl.Object]
         for col in self.rawdf.columns:
-            if self.rawdf.select(col).dtypes[0] == pl.Utf8:
+            col_type = self.rawdf.select(col).dtypes[0]
+            if col_type == pl.Utf8:
                 temp = self.rawdf.select(col).filter(~pl.col(col).is_null()).limit(1).collect().item()
-                if re.match(regex,temp):
+                try:
+                    test = parser.parse(temp)
+                except:
+                    test = None
+                if test:
                     self.datetimes += [col]
                 else:
                     self.dimensions += [col]
-            elif (self.rawdf.select(col).dtypes[0] == pl.Float32) \
-                or (self.rawdf.select(col).dtypes[0] == pl.Float64):
+            elif col_type in dim_types:
+                self.dimensions += [col]
+            elif col_type in met_types:
                 self.metrics += [col]
+            else:
+                ## TODO: add function to compare number of unique values to total row count
+                ## If countdistinct > 0.75 * row_count then metric else dimension
+                self.unknowns += [col]
+        self.pldf = self.rawdf.collect().select([pl.col(column) for column in self.dimensions]+\
+            [pl.col(column) for column in self.metrics]+\
+            [pl.col(column).str.strptime(pl.Datetime) for column in self.datetimes])
         return
     
     
