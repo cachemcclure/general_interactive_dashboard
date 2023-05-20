@@ -63,6 +63,29 @@ class mainWindow(QMainWindow):
         ## Add Widgets
         self.widget_one = FilterWidget(self)
         self.widget_two = PlotlyWidget(self)
+        
+        ## Filter and Label Defs
+        self.filter_defs = {'1':self.widget_one.filter_one,
+                            '2':self.widget_one.filter_two,
+                            '3':self.widget_one.filter_three,
+                            '4':self.widget_one.filter_four,
+                            '5':self.widget_one.filter_five,
+                            '6':self.widget_one.filter_six,
+                            '7':self.widget_one.filter_seven,
+                            '8':self.widget_one.filter_eight,
+                            '9':self.widget_one.filter_nine,
+                            '10':self.widget_one.filter_ten}
+        
+        self.label_defs = {'1':self.widget_one.label_one,
+                           '2':self.widget_one.label_two,
+                           '3':self.widget_one.label_three,
+                           '4':self.widget_one.label_four,
+                           '5':self.widget_one.label_five,
+                           '6':self.widget_one.label_six,
+                           '7':self.widget_one.label_seven,
+                           '8':self.widget_one.label_eight,
+                           '9':self.widget_one.label_nine,
+                           '10':self.widget_one.label_ten}
 
         ## Buttons
         ## Exit Button
@@ -101,8 +124,8 @@ class mainWindow(QMainWindow):
         self.setGeometry(100,100,900,600)
 
         ## Connect Date Filter Buttons to Fx
-        self.widget_one.startDate_filter.dateChanged.connect(self.onStartDateChanged)
-        self.widget_one.endDate_filter.dateChanged.connect(self.onEndDateChanged)
+        #self.widget_one.startDate_filter.dateChanged.connect(self.onStartDateChanged)
+        #self.widget_one.endDate_filter.dateChanged.connect(self.onEndDateChanged)
 
         ## Connect Filters to Fx
         #self.widget_one.storefront_filter.activated.connect(self.updateFilters)
@@ -162,9 +185,16 @@ class mainWindow(QMainWindow):
     
     
     def setFilters(self):
-        self.filters = {}
+        ## TODO: redo filter object to differentiate between dim/met/datetime
+        ## TODO: include column name, filter name, label name, and filter in filter object
+        self.filters = {'dimensions':[],
+                        'metrics':[],
+                        'datetime':[]}
         for dim in self.dimensions:
-            self.filters[dim] = ['All']
+            self.filters['dimensions'] += {'col_name':dim,
+                                           'filter_name':'',
+                                           'label_name':'',
+                                           'filter':['All']}
             self.filters[dim] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
         for field in self.datetimes:
             self.filters[field] = datetime.today().strftime('%Y-%m-%d')
@@ -669,8 +699,8 @@ class FilterWidget(QtWidgets.QWidget):
         self.filter_ten.setVisible(False)
         
         
-    def set_filter_vis_labd(self,
-                            filters:list):
+    def setFilterVis(self,
+                     filters:list):
         ## TODO: add parsing function to set filters
         ## RETURN: dictionary of field names and filters
         return
@@ -700,5 +730,5 @@ def window():
     win.show()
     sys.exit(app.exec_())
 
-
-window()
+if __name__ == '__main__':
+    window()
