@@ -65,27 +65,50 @@ class mainWindow(QMainWindow):
         self.widget_two = PlotlyWidget(self)
         
         ## Filter and Label Defs
-        self.filter_defs = {'1':self.widget_one.filter_one,
-                            '2':self.widget_one.filter_two,
-                            '3':self.widget_one.filter_three,
-                            '4':self.widget_one.filter_four,
-                            '5':self.widget_one.filter_five,
-                            '6':self.widget_one.filter_six,
-                            '7':self.widget_one.filter_seven,
-                            '8':self.widget_one.filter_eight,
-                            '9':self.widget_one.filter_nine,
-                            '10':self.widget_one.filter_ten}
+        self.filter_defs = {1:self.widget_one.filter_one,
+                            2:self.widget_one.filter_two,
+                            3:self.widget_one.filter_three,
+                            4:self.widget_one.filter_four,
+                            5:self.widget_one.filter_five,
+                            6:self.widget_one.filter_six,
+                            7:self.widget_one.filter_seven,
+                            8:self.widget_one.filter_eight,
+                            9:self.widget_one.filter_nine,
+                            10:self.widget_one.filter_ten}
         
-        self.label_defs = {'1':self.widget_one.label_one,
-                           '2':self.widget_one.label_two,
-                           '3':self.widget_one.label_three,
-                           '4':self.widget_one.label_four,
-                           '5':self.widget_one.label_five,
-                           '6':self.widget_one.label_six,
-                           '7':self.widget_one.label_seven,
-                           '8':self.widget_one.label_eight,
-                           '9':self.widget_one.label_nine,
-                           '10':self.widget_one.label_ten}
+        self.label_defs = {1:self.widget_one.label_one,
+                           2:self.widget_one.label_two,
+                           3:self.widget_one.label_three,
+                           4:self.widget_one.label_four,
+                           5:self.widget_one.label_five,
+                           6:self.widget_one.label_six,
+                           7:self.widget_one.label_seven,
+                           8:self.widget_one.label_eight,
+                           9:self.widget_one.label_nine,
+                           10:self.widget_one.label_ten}
+        
+        self.start_date_filter_defs = {1:self.widget_one.startDate1_filter,
+                                       2:self.widget_one.startDate2_filter,
+                                       3:self.widget_one.startDate3_filter,
+                                       4:self.widget_one.startDate4_filter,
+                                       5:self.widget_one.startDate5_filter}
+        
+        self.start_date_label_defs = {1:self.widget_one.startDate1_label,
+                                      2:self.widget_one.startDate2_label,
+                                      3:self.widget_one.startDate3_label,
+                                      4:self.widget_one.startDate4_label,
+                                      5:self.widget_one.startDate5_label}
+        
+        self.end_date_filter_defs = {1:self.widget_one.endDate1_filter,
+                                     2:self.widget_one.endDate2_filter,
+                                     3:self.widget_one.endDate3_filter,
+                                     4:self.widget_one.endDate4_filter,
+                                     5:self.widget_one.endDate5_filter}
+        self.end_date_label_defs = {1:self.widget_one.endDate1_label,
+                                    2:self.widget_one.endDate2_label,
+                                    3:self.widget_one.endDate3_label,
+                                    4:self.widget_one.endDate4_label,
+                                    5:self.widget_one.endDate5_label}
 
         ## Buttons
         ## Exit Button
@@ -155,19 +178,11 @@ class mainWindow(QMainWindow):
 #                        'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
 #                        'end_date':datetime.today().strftime('%Y-%m-%d')}
     
-
-    def onStartDateChanged(self,newDate):
-        self.filters['start_date'] = newDate.toString("yyyy-MM-dd")
-    
-
-    def onEndDateChanged(self,newDate):
-        self.filters['end_date'] = newDate.toString("yyyy-MM-dd")
-    
     
     def onDateChange(self,
                      field:str,
                      newDate):
-        self.filters[field] = newDate.toString("yyy-MM-dd")
+        self.filters['datetime'][field]['filter'] = newDate.toString("yyy-MM-dd")
     
 
     def retData(self):
@@ -178,27 +193,35 @@ class mainWindow(QMainWindow):
             self.readData(filename)
             self.setDimsMets()
             self.setFilters()
-            print(self.dimensions)
-            print(self.metrics)
-            print(self.datetimes)
+            #print(self.dimensions)
+            #print(self.metrics)
+            #print(self.datetimes)
         return
     
     
     def setFilters(self):
-        ## TODO: redo filter object to differentiate between dim/met/datetime
-        ## TODO: include column name, filter name, label name, and filter in filter object
         self.filters = {'dimensions':[],
                         'metrics':[],
                         'datetime':[]}
         iter = 1
         for dim in self.dimensions:
-            self.filters['dimensions'][dim] = {'filter_name':self.filter_defs[iter],
-                                               'label_name':self.label_defs[iter],
-                                               'filter':['All']}
-            iter += 1
-            self.filters['dimensions'][dim]['filter'] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
+            while iter < 10:
+                self.filters['dimensions'][dim] = {'filter':self.filter_defs[iter],
+                                                   'label':self.label_defs[iter],
+                                                   'filter_entries':['All'],
+                                                   'current_selection':'All'}
+                iter += 1
+                self.filters['dimensions'][dim]['filter_entries'] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
+        iter = 1
         for field in self.datetimes:
-            self.filters['datetime'][field] = {'filter':datetime.today().strftime('%Y-%m-%d')}
+            while iter < 5:
+                self.filters['datetime'][field] = {'start_filter':self.start_date_filter_defs[iter],
+                                                   'start_label':self.start_date_label_defs[iter],
+                                                   'end_filter':self.end_date_filter_defs[iter],
+                                                   'end_label':self.end_date_label_defs[iter],
+                                                   'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
+                                                   'end_date':datetime.today().strftime('%Y-%m-%d')}
+                iter += 1
         return
     
 
@@ -270,7 +293,7 @@ class mainWindow(QMainWindow):
         return
 
 
-    def updateFilters(self):
+    def updateFilters_old(self):
         self.filters['storefront_name'] = self.widget_one.storefront_filter.currentText()
         self.filters['partner'] = self.widget_one.partner_filter.currentText()
         self.filters['brand'] = self.widget_one.brand_filter.currentText()
@@ -304,6 +327,23 @@ class mainWindow(QMainWindow):
             filter_objects[filter_0].clear()
             filter_objects[filter_0].addItem('All')
             filter_objects[filter_0].addItems(sorted(filter(None,list(set(filterdf[filter_0])))))
+    
+    
+    def updateFilters(self):
+        for field in self.filters['dimensions']:
+            temp_filter = self.filters['dimensions'][field]
+            temp_filter['current_selection'] = temp_filter['filter'].currentText
+            self.filterd_df = self.pldf.filter(pl.col(field) == temp_filter['current_selection'])
+        for field in self.filters['datetime']:
+            temp_filter = self.filters['datetime'][field]
+        for field in self.filters['dimensions']:
+            if self.filters['dimensions'][field]['current_selection'] != 'All':
+                temp_filter = self.filters['dimensions'][field]
+                temp_filter['filter_entries'] = self.filtered_df.select(pl.col(field)).unique().get_columns()[0].to_list()
+                temp_filter['filter'].clear()
+                temp_filter['filter'].addItem('All')
+                temp_filter['filter'].addItems(sorted(filter(None,list(set(temp_filter['filter_entries'])))))
+        return
     
 
     def popFilters(self):
@@ -588,6 +628,14 @@ class FilterWidget(QtWidgets.QWidget):
         self.startDate3_filter.setDate(QtCore.QDate.currentDate().addYears(-1))
         self.endDate3_filter = QtWidgets.QDateEdit()
         self.endDate3_filter.setDate(QtCore.QDate.currentDate())
+        self.startDate4_filter = QtWidgets.QDateEdit()
+        self.startDate4_filter.setDate(QtCore.QDate.currentDate().addYears(-1))
+        self.endDate4_filter = QtWidgets.QDateEdit()
+        self.endDate4_filter.setDate(QtCore.QDate.currentDate())
+        self.startDate5_filter = QtWidgets.QDateEdit()
+        self.startDate5_filter.setDate(QtCore.QDate.currentDate().addYears(-1))
+        self.endDate5_filter = QtWidgets.QDateEdit()
+        self.endDate5_filter.setDate(QtCore.QDate.currentDate())
 
         ## Labels
         self.label_one = QtWidgets.QLabel()
@@ -622,6 +670,10 @@ class FilterWidget(QtWidgets.QWidget):
         #self.startDate_label.setText('Start Date')
         self.endDate3_label = QtWidgets.QLabel()
         #self.endDate_label.setText('End Date')
+        self.startDate4_label = QtWidgets.QLabel()
+        self.endDate4_label = QtWidgets.QLabel()
+        self.startDate5_label = QtWidgets.QLabel()
+        self.endDate5_label = QtWidgets.QLabel()
 
         ## Reset Button
         self.reset_b = QtWidgets.QPushButton(self)
@@ -644,6 +696,14 @@ class FilterWidget(QtWidgets.QWidget):
         layout.addWidget(self.startDate3_filter)
         layout.addWidget(self.endDate3_label)
         layout.addWidget(self.endDate3_filter)
+        layout.addWidget(self.startDate4_label)
+        layout.addWidget(self.startDate4_filter)
+        layout.addWidget(self.endDate4_label)
+        layout.addWidget(self.endDate4_filter)
+        layout.addWidget(self.startDate5_label)
+        layout.addWidget(self.startDate5_filter)
+        layout.addWidget(self.endDate5_label)
+        layout.addWidget(self.endDate5_filter)
         layout.addWidget(self.label_one)
         layout.addWidget(self.filter_one)
         layout.addWidget(self.label_two)
@@ -678,6 +738,14 @@ class FilterWidget(QtWidgets.QWidget):
         self.startDate3_filter.setVisible(False)
         self.endDate3_label.setVisible(False)
         self.endDate3_filter.setVisible(False)
+        self.startDate4_label.setVisible(False)
+        self.startDate4_filter.setVisible(False)
+        self.endDate4_label.setVisible(False)
+        self.endDate4_filter.setVisible(False)
+        self.startDate5_label.setVisible(False)
+        self.startDate5_filter.setVisible(False)
+        self.endDate5_label.setVisible(False)
+        self.endDate5_filter.setVisible(False)
         self.label_one.setVisible(False)
         self.filter_one.setVisible(False)
         self.label_two.setVisible(False)
