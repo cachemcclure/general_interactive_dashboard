@@ -286,6 +286,7 @@ class mainWindow(QMainWindow):
         del temp
         if no_cols == 1:
             self.ret_label.setText('Delimiter cannot be determined')
+            self.hideFilters()
             #raise Exception('Delimiter cannot be determined')
         self.rawdf = pl.scan_csv(source=filename,separator=separator)
         #print(self.rawdf.select(pl.count()).collect().item())
@@ -324,6 +325,22 @@ class mainWindow(QMainWindow):
             temp_filter = self.filters['datetimes'][field]
             temp_filter['start_filter'].setDate(QtCore.QDate.currentDate().addYears(-1))
             temp_filter['end_filter'].setDate(QtCore.QDate.currentDate())
+        return
+    
+    
+    def hideFilters(self):
+        for field in self.filter_defs:
+            self.filter_def[field].setVisible(False)
+        for field in self.label_defs:
+            self.label_defs[field].setVisible(False)
+        for field in self.start_date_filter_defs:
+            self.start_date_filter_defs[field].setVisible(False)
+        for field in self.start_date_label_defs:
+            self.start_date_label_defs[field].setVisible(False)
+        for field in self.end_date_filter_defs:
+            self.end_date_filter_defs[field].setVisible(False)
+        for field in self.end_date_label_defs:
+            self.end_date_label_defs[field].setVisible(False)
         return
 
 
