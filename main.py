@@ -181,8 +181,15 @@ class mainWindow(QMainWindow):
     
     def onDateChange(self,
                      field:str,
+                     state:str,
                      newDate):
-        self.filters['datetime'][field]['filter'] = newDate.toString("yyy-MM-dd")
+        print(field)
+        print(state)
+        print(newDate.toString('yyyy-MM-dd'))
+        if state == 'start':
+            self.filters['datetime'][field]['start_date'] = newDate.toString("yyyy-MM-dd")
+        else:
+            self.filters['datetime'][field]['end_date'] = newDate.toString("yyyy-MM-dd")
     
 
     def retData(self):
@@ -203,36 +210,42 @@ class mainWindow(QMainWindow):
         self.filters = {'dimensions':{},
                         'metrics':{},
                         'datetime':{}}
+        #self.widget_one.endDate_filter.dateChanged.connect(self.onEndDateChanged)
         iter = 1
         for dim in self.dimensions:
-            while iter < 10:
-                self.filters['dimensions'][dim] = {'filter':self.filter_defs[iter],
-                                                   'label':self.label_defs[iter],
-                                                   'filter_entries':['All'],
-                                                   'current_selection':'All'}
-                iter += 1
-                self.filters['dimensions'][dim]['filter_entries'] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
-                self.filters['dimensions'][dim]['label'].setText(dim)
-                self.filters['dimensions'][dim]['filter'].clear()
-                self.filters['dimensions'][dim]['filter'].addItems(self.filters['dimensions'][dim]['filter_entries'])
-                self.filters['dimensions'][dim]['label'].setVisible(True)
-                self.filters['dimensions'][dim]['filter'].setVisible(True)
+            if iter > 10:
+                break
+            self.filters['dimensions'][dim] = {'filter':self.filter_defs[iter],
+                                                'label':self.label_defs[iter],
+                                                'filter_entries':['All'],
+                                                'current_selection':'All'}
+            iter += 1
+            self.filters['dimensions'][dim]['filter_entries'] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
+            self.filters['dimensions'][dim]['label'].setText(dim)
+            self.filters['dimensions'][dim]['filter'].clear()
+            self.filters['dimensions'][dim]['filter'].addItems([str(xx) for xx in self.filters['dimensions'][dim]['filter_entries']])
+            self.filters['dimensions'][dim]['label'].setVisible(True)
+            self.filters['dimensions'][dim]['filter'].setVisible(True)
+            self.filters['dimensions'][dim]['filter'].activated.connect(self.updateFilters)
         iter = 1
         for field in self.datetimes:
-            while iter < 5:
-                self.filters['datetime'][field] = {'start_filter':self.start_date_filter_defs[iter],
-                                                   'start_label':self.start_date_label_defs[iter],
-                                                   'end_filter':self.end_date_filter_defs[iter],
-                                                   'end_label':self.end_date_label_defs[iter],
-                                                   'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
-                                                   'end_date':datetime.today().strftime('%Y-%m-%d')}
-                self.filters['datetime'][field]['start_label'].setText(f'Start {dim}')
-                self.filters['datetime'][field]['start_label'].setVisible(True)
-                self.filters['datetime'][field]['start_filter'].setVisible(True)
-                self.filters['datetime'][field]['end_label'].setText(f'End {dim}')
-                self.filters['datetime'][field]['end_label'].setVisible(True)
-                self.filters['datetime'][field]['end_filter'].setVisible(True)
-                iter += 1
+            if iter > 5:
+                break
+            self.filters['datetime'][field] = {'start_filter':self.start_date_filter_defs[iter],
+                                                'start_label':self.start_date_label_defs[iter],
+                                                'end_filter':self.end_date_filter_defs[iter],
+                                                'end_label':self.end_date_label_defs[iter],
+                                                'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
+                                                'end_date':datetime.today().strftime('%Y-%m-%d')}
+            self.filters['datetime'][field]['start_label'].setText(f'Start {field}')
+            self.filters['datetime'][field]['start_label'].setVisible(True)
+            self.filters['datetime'][field]['start_filter'].setVisible(True)
+            self.filters['datetime'][field]['start_filter'].dateChanged.connect(lambda newDate, state='start', filter=field: self.onDateChange(filter, state, newDate))
+            self.filters['datetime'][field]['end_label'].setText(f'End {field}')
+            self.filters['datetime'][field]['end_label'].setVisible(True)
+            self.filters['datetime'][field]['end_filter'].setVisible(True)
+            self.filters['datetime'][field]['end_filter'].dateChanged.connect(lambda newDate, state='end', filter=field: self.onDateChange(filter, state, newDate))
+            iter += 1
         return
     
 
@@ -343,14 +356,15 @@ class mainWindow(QMainWindow):
     def updateFilters(self):
         for field in self.filters['dimensions']:
             temp_filter = self.filters['dimensions'][field]
-            temp_filter['current_selection'] = temp_filter['filter'].currentText
-            self.filterd_df = self.pldf.filter(pl.col(field) == temp_filter['current_selection'])
+            temp_filter['current_selection'] = temp_filter['filter'].currentText()
+            if temp_filter['current_selection'] != 'All':
+                self.filtered_df = self.pldf.filter(pl.col(field) == temp_filter['current_selection'])
         for field in self.filters['datetime']:
             temp_filter = self.filters['datetime'][field]
         for field in self.filters['dimensions']:
             if self.filters['dimensions'][field]['current_selection'] == 'All':
                 temp_filter = self.filters['dimensions'][field]
-                temp_filter['filter_entries'] = self.filtered_df.select(pl.col(field)).unique().get_columns()[0].to_list()
+                temp_filter['filter_entries'] = [str(xx) for xx in self.filtered_df.select(pl.col(field)).unique().get_columns()[0].to_list()]
                 temp_filter['filter'].clear()
                 temp_filter['filter'].addItem('All')
                 temp_filter['filter'].addItems(sorted(filter(None,list(set(temp_filter['filter_entries'])))))
