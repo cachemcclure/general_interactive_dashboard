@@ -265,6 +265,7 @@ class mainWindow(QMainWindow):
         self.pldf = self.rawdf.collect().select([pl.col(column) for column in self.dimensions]+\
             [pl.col(column) for column in self.metrics]+\
             [pl.col(column).str.strptime(pl.Datetime) for column in self.datetimes])
+        self.filtered_df = self.pldf
         return
     
     
@@ -293,7 +294,7 @@ class mainWindow(QMainWindow):
             temp_filter = self.filters['dimensions'][field]
             temp_filter['current_selection'] = temp_filter['filter'].currentText()
             if temp_filter['current_selection'] != 'All':
-                self.filtered_df = self.pldf.filter(pl.col(field) == temp_filter['current_selection'])
+                self.filtered_df = self.filtered_df.filter(pl.col(field) == temp_filter['current_selection'])
         for field in self.filters['datetimes']:
             temp_filter = self.filters['datetimes'][field]
         for field in self.filters['dimensions']:
@@ -532,6 +533,20 @@ class FilterWidget(QtWidgets.QWidget):
         self.vis_type.addItems(['Time-series',
                                 'Pie Chart',
                                 'Bar Chart'])
+        
+        ## Report Fields
+        self.primary_field_label = QtWidgets.QLabel()
+        self.primary_field_label.setText('Primary Dimension')
+        self.primary_field_filter = QtWidgets.QComboBox()
+        self.secondary_field_label = QtWidgets.QLabel()
+        self.secondary_field_label.setText('Secondary Dimension')
+        self.secondary_field_filter = QtWidgets.QComboBox()
+        self.primary_metric_label = QtWidgets.QLabel()
+        self.primary_metric_label.setText('Primary Metric')
+        self.primary_metric_filter = QtWidgets.QComboBox()
+        self.secondary_metric_label = QtWidgets.QLabel()
+        self.secondary_metric_label.setText('Secondary Metric')
+        self.secondary_metric_filter = QtWidgets.QComboBox()
 
         ## Filters
         self.filter_one = QtWidgets.QComboBox()
@@ -622,6 +637,14 @@ class FilterWidget(QtWidgets.QWidget):
         layout.addWidget(self.reset_b)
         layout.addWidget(vis_label)
         layout.addWidget(self.vis_type)
+        layout.addWidget(self.primary_field_label)
+        layout.addWidget(self.primary_field_filter)
+        layout.addWidget(self.secondary_field_label)
+        layout.addWidget(self.secondary_field_filter)
+        layout.addWidget(self.primary_metric_label)
+        layout.addWidget(self.primary_metric_filter)
+        layout.addWidget(self.secondary_metric_label)
+        layout.addWidget(self.secondary_metric_filter)
         layout.addWidget(self.startDate1_label)
         layout.addWidget(self.startDate1_filter)
         layout.addWidget(self.endDate1_label)
