@@ -171,6 +171,7 @@ class mainWindow(QMainWindow):
             self.readData(filename)
             self.setDimsMets()
             self.setFilters()
+            self.ret_label.setText(f'Data loaded from {self.filename}')
             #print(self.dimensions)
             #print(self.metrics)
             #print(self.datetimes)
@@ -271,11 +272,12 @@ class mainWindow(QMainWindow):
     
     def readData(self,filename):
         with open(filename,'r') as f:
-            temp = f.read()
+            temp = f.readline()
         first_line = temp[:temp.find('\n')]
         common_delim = ['\t',',','|']
         separator = ''
         no_cols = 1
+        self.filename = filename
         for delim in common_delim:
             sep_ct = first_line.count(delim)
             if (sep_ct + 1) > no_cols:
@@ -283,7 +285,8 @@ class mainWindow(QMainWindow):
                 no_cols = sep_ct + 1
         del temp
         if no_cols == 1:
-            raise Exception('Delimiter cannot be determined')
+            self.ret_label.setText('Delimiter cannot be determined')
+            #raise Exception('Delimiter cannot be determined')
         self.rawdf = pl.scan_csv(source=filename,separator=separator)
         #print(self.rawdf.select(pl.count()).collect().item())
         return
