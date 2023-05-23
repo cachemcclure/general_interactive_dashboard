@@ -6,18 +6,18 @@
 ## Import Modules
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
-from pyqtgraph.dockarea import *
-from sqlalchemy import create_engine
+from pyqtgraph.dockarea import DockArea, Dock
+#from sqlalchemy import create_engine
 import pandas as pd
 import polars as pl
-from pickle import load as pload
-from pickle import dump as pdump
+#from pickle import load as pload
+#from pickle import dump as pdump
 import plotly.express as px
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import dateutil.parser as parser
-import re
-from os.path import exists
+#import re
+#from os.path import exists
 import sys
 
 
