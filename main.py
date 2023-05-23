@@ -146,50 +146,21 @@ class mainWindow(QMainWindow):
         self.dock2.addWidget(self.widget_two)
         self.setGeometry(100,100,900,600)
 
-        ## Connect Date Filter Buttons to Fx
-        #self.widget_one.startDate_filter.dateChanged.connect(self.onStartDateChanged)
-        #self.widget_one.endDate_filter.dateChanged.connect(self.onEndDateChanged)
-
-        ## Connect Filters to Fx
-        #self.widget_one.storefront_filter.activated.connect(self.updateFilters)
-        #self.widget_one.partner_filter.activated.connect(self.updateFilters)
-        #self.widget_one.brand_filter.activated.connect(self.updateFilters)
-        #self.widget_one.category_filter.activated.connect(self.updateFilters)
-        #self.widget_one.type_filter.activated.connect(self.updateFilters)
-        #self.widget_one.subType_filter.activated.connect(self.updateFilters)
-        #self.widget_one.orderType_filter.activated.connect(self.updateFilters)
-        #self.widget_one.status_filter.activated.connect(self.updateFilters)
-        #self.widget_one.province_filter.activated.connect(self.updateFilters)
-
         ## Connect Reset Filters button to Fx 
         self.widget_one.reset_b.clicked.connect(self.resetFilters)
-
-        ## Set Initial Filters
-#        self.filters = {'report':'Revenue',
-#                        'storefront_name':'All',
-#                        'partner':'All',
-#                        'brand':'All',
-#                        'product_category':'All',
-#                        'product_type':'All',
-#                        'product_subtype':'All',
-#                        'order_type':'All',
-#                        'order_status':'All',
-#                        'province':'All',
-#                        'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
-#                        'end_date':datetime.today().strftime('%Y-%m-%d')}
     
     
     def onDateChange(self,
                      field:str,
                      state:str,
                      newDate):
-        print(field)
-        print(state)
-        print(newDate.toString('yyyy-MM-dd'))
+        #print(field)
+        #print(state)
+        #print(newDate.toString('yyyy-MM-dd'))
         if state == 'start':
-            self.filters['datetime'][field]['start_date'] = newDate.toString("yyyy-MM-dd")
+            self.filters['datetimes'][field]['start_date'] = newDate.toString("yyyy-MM-dd")
         else:
-            self.filters['datetime'][field]['end_date'] = newDate.toString("yyyy-MM-dd")
+            self.filters['datetimes'][field]['end_date'] = newDate.toString("yyyy-MM-dd")
     
 
     def retData(self):
@@ -209,7 +180,7 @@ class mainWindow(QMainWindow):
     def setFilters(self):
         self.filters = {'dimensions':{},
                         'metrics':{},
-                        'datetime':{}}
+                        'datetimes':{}}
         #self.widget_one.endDate_filter.dateChanged.connect(self.onEndDateChanged)
         iter = 1
         for dim in self.dimensions:
@@ -231,20 +202,20 @@ class mainWindow(QMainWindow):
         for field in self.datetimes:
             if iter > 5:
                 break
-            self.filters['datetime'][field] = {'start_filter':self.start_date_filter_defs[iter],
+            self.filters['datetimes'][field] = {'start_filter':self.start_date_filter_defs[iter],
                                                 'start_label':self.start_date_label_defs[iter],
                                                 'end_filter':self.end_date_filter_defs[iter],
                                                 'end_label':self.end_date_label_defs[iter],
                                                 'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
                                                 'end_date':datetime.today().strftime('%Y-%m-%d')}
-            self.filters['datetime'][field]['start_label'].setText(f'Start {field}')
-            self.filters['datetime'][field]['start_label'].setVisible(True)
-            self.filters['datetime'][field]['start_filter'].setVisible(True)
-            self.filters['datetime'][field]['start_filter'].dateChanged.connect(lambda newDate, state='start', filter=field: self.onDateChange(filter, state, newDate))
-            self.filters['datetime'][field]['end_label'].setText(f'End {field}')
-            self.filters['datetime'][field]['end_label'].setVisible(True)
-            self.filters['datetime'][field]['end_filter'].setVisible(True)
-            self.filters['datetime'][field]['end_filter'].dateChanged.connect(lambda newDate, state='end', filter=field: self.onDateChange(filter, state, newDate))
+            self.filters['datetimes'][field]['start_label'].setText(f'Start {field}')
+            self.filters['datetimes'][field]['start_label'].setVisible(True)
+            self.filters['datetimes'][field]['start_filter'].setVisible(True)
+            self.filters['datetimes'][field]['start_filter'].dateChanged.connect(lambda newDate, state='start', filter=field: self.onDateChange(filter, state, newDate))
+            self.filters['datetimes'][field]['end_label'].setText(f'End {field}')
+            self.filters['datetimes'][field]['end_label'].setVisible(True)
+            self.filters['datetimes'][field]['end_filter'].setVisible(True)
+            self.filters['datetimes'][field]['end_filter'].dateChanged.connect(lambda newDate, state='end', filter=field: self.onDateChange(filter, state, newDate))
             iter += 1
         return
     
@@ -315,42 +286,6 @@ class mainWindow(QMainWindow):
         self.rawdf = pl.scan_csv(source=filename,separator=separator)
         #print(self.rawdf.select(pl.count()).collect().item())
         return
-
-
-    def updateFilters_old(self):
-        self.filters['storefront_name'] = self.widget_one.storefront_filter.currentText()
-        self.filters['partner'] = self.widget_one.partner_filter.currentText()
-        self.filters['brand'] = self.widget_one.brand_filter.currentText()
-        self.filters['product_category'] = self.widget_one.category_filter.currentText()
-        self.filters['product_type'] = self.widget_one.type_filter.currentText()
-        self.filters['product_subtype'] = self.widget_one.subType_filter.currentText()
-        self.filters['order_type'] = self.widget_one.orderType_filter.currentText()
-        self.filters['order_status'] = self.widget_one.status_filter.currentText()
-        self.filters['province'] = self.widget_one.province_filter.currentText()
-
-        filterdf = self.rawdf
-        filtered_fields = [filter_0 for filter_0 in self.filters if (self.filters[filter_0] != 'All') and 
-                           (filter_0 not in ['start_date','end_date','report'])]
-        unfiltered_fields = [filter_0 for filter_0 in self.filters if (self.filters[filter_0] == 'All') and 
-                           (filter_0 not in ['start_date','end_date','report'])]
-
-        for filter_0 in filtered_fields:
-            filterdf = filterdf[filterdf[filter_0]==self.filters[filter_0]]
-        
-        filter_objects = {'storefront_name':self.widget_one.storefront_filter,
-                          'partner':self.widget_one.partner_filter,
-                          'brand':self.widget_one.brand_filter,
-                          'product_category':self.widget_one.category_filter,
-                          'product_type':self.widget_one.type_filter,
-                          'product_subtype':self.widget_one.subType_filter,
-                          'order_type':self.widget_one.orderType_filter,
-                          'order_status':self.widget_one.status_filter,
-                          'province':self.widget_one.province_filter}
-        
-        for filter_0 in unfiltered_fields:
-            filter_objects[filter_0].clear()
-            filter_objects[filter_0].addItem('All')
-            filter_objects[filter_0].addItems(sorted(filter(None,list(set(filterdf[filter_0])))))
     
     
     def updateFilters(self):
@@ -359,8 +294,8 @@ class mainWindow(QMainWindow):
             temp_filter['current_selection'] = temp_filter['filter'].currentText()
             if temp_filter['current_selection'] != 'All':
                 self.filtered_df = self.pldf.filter(pl.col(field) == temp_filter['current_selection'])
-        for field in self.filters['datetime']:
-            temp_filter = self.filters['datetime'][field]
+        for field in self.filters['datetimes']:
+            temp_filter = self.filters['datetimes'][field]
         for field in self.filters['dimensions']:
             if self.filters['dimensions'][field]['current_selection'] == 'All':
                 temp_filter = self.filters['dimensions'][field]
@@ -371,43 +306,21 @@ class mainWindow(QMainWindow):
         return
     
 
-    def popFilters(self):
-        self.widget_one.storefront_filter.addItems(sorted(filter(None,list(set(self.rawdf['storefront_name'])))))
-        self.widget_one.partner_filter.addItems(sorted(filter(None,list(set(self.rawdf['partner'])))))
-        self.widget_one.brand_filter.addItems(sorted(filter(None,list(set(self.rawdf['brand'])))))
-        self.widget_one.category_filter.addItems(sorted(filter(None,list(set(self.rawdf['product_category'])))))
-        self.widget_one.type_filter.addItems(sorted(filter(None,list(set(self.rawdf['product_type'])))))
-        self.widget_one.subType_filter.addItems(sorted(filter(None,list(set(self.rawdf['product_subtype'])))))
-        self.widget_one.orderType_filter.addItems(sorted(filter(None,list(set(self.rawdf['order_type'])))))
-        self.widget_one.status_filter.addItems(sorted(filter(None,list(set(self.rawdf['order_status'])))))
-        self.widget_one.province_filter.addItems(sorted(filter(None,list(set(self.rawdf['province'])))))
-    
-
     def resetFilters(self):
-        self.widget_one.startDate_filter.setDate(QtCore.QDate.currentDate().addYears(-1))
-        self.widget_one.endDate_filter.setDate(QtCore.QDate.currentDate())
-
-        self.widget_one.storefront_filter.clear()
-        self.widget_one.partner_filter.clear()
-        self.widget_one.brand_filter.clear()
-        self.widget_one.category_filter.clear()
-        self.widget_one.type_filter.clear()
-        self.widget_one.subType_filter.clear()
-        self.widget_one.orderType_filter.clear()
-        self.widget_one.status_filter.clear()
-        self.widget_one.province_filter.clear()
-
-        self.widget_one.storefront_filter.addItem('All')
-        self.widget_one.partner_filter.addItem('All')
-        self.widget_one.brand_filter.addItem('All')
-        self.widget_one.category_filter.addItem('All')
-        self.widget_one.type_filter.addItem('All')
-        self.widget_one.subType_filter.addItem('All')
-        self.widget_one.orderType_filter.addItem('All')
-        self.widget_one.status_filter.addItem('All')
-        self.widget_one.province_filter.addItem('All')
-
-        self.popFilters()
+        self.filtered_df = self.pldf 
+        
+        for field in self.filters['dimensions']:
+            temp_filter = self.filters['dimensions'][field]
+            temp_filter['filter_entries'] = [str(xx) for xx in self.filtered_df.select(pl.col(field)).unique().get_columns()[0].to_list()]
+            temp_filter['filter'].clear()
+            temp_filter['filter'].addItem('All')
+            temp_filter['filter'].addItems(sorted(filter(None,list(set(temp_filter['filter_entries'])))))
+        
+        for field in self.filters['datetimes']:
+            temp_filter = self.filters['datetimes'][field]
+            temp_filter['start_filter'].setDate(QtCore.QDate.currentDate().addYears(-1))
+            temp_filter['end_filter'].setDate(QtCore.QDate.currentDate())
+        return
 
 
     def showPlot_test(self):
