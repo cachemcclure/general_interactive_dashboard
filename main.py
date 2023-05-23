@@ -200,9 +200,9 @@ class mainWindow(QMainWindow):
     
     
     def setFilters(self):
-        self.filters = {'dimensions':[],
-                        'metrics':[],
-                        'datetime':[]}
+        self.filters = {'dimensions':{},
+                        'metrics':{},
+                        'datetime':{}}
         iter = 1
         for dim in self.dimensions:
             while iter < 10:
