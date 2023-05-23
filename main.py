@@ -337,7 +337,7 @@ class mainWindow(QMainWindow):
         for field in self.filters['datetime']:
             temp_filter = self.filters['datetime'][field]
         for field in self.filters['dimensions']:
-            if self.filters['dimensions'][field]['current_selection'] != 'All':
+            if self.filters['dimensions'][field]['current_selection'] == 'All':
                 temp_filter = self.filters['dimensions'][field]
                 temp_filter['filter_entries'] = self.filtered_df.select(pl.col(field)).unique().get_columns()[0].to_list()
                 temp_filter['filter'].clear()
