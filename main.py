@@ -212,6 +212,11 @@ class mainWindow(QMainWindow):
                                                    'current_selection':'All'}
                 iter += 1
                 self.filters['dimensions'][dim]['filter_entries'] += self.pldf.select(pl.col(dim)).unique().get_columns()[0].to_list()
+                self.filters['dimensions'][dim]['label'].setText(dim)
+                self.filters['dimensions'][dim]['filter'].clear()
+                self.filters['dimensions'][dim]['filter'].addItems(self.filters['dimensions'][dim]['filter_entries'])
+                self.filters['dimensions'][dim]['label'].setVisible(True)
+                self.filters['dimensions'][dim]['filter'].setVisible(True)
         iter = 1
         for field in self.datetimes:
             while iter < 5:
@@ -221,6 +226,12 @@ class mainWindow(QMainWindow):
                                                    'end_label':self.end_date_label_defs[iter],
                                                    'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
                                                    'end_date':datetime.today().strftime('%Y-%m-%d')}
+                self.filters['datetime'][field]['start_label'].setText(f'Start {dim}')
+                self.filters['datetime'][field]['start_label'].setVisible(True)
+                self.filters['datetime'][field]['start_filter'].setVisible(True)
+                self.filters['datetime'][field]['end_label'].setText(f'End {dim}')
+                self.filters['datetime'][field]['end_label'].setVisible(True)
+                self.filters['datetime'][field]['end_filter'].setVisible(True)
                 iter += 1
         return
     
