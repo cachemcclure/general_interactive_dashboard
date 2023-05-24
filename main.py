@@ -170,7 +170,7 @@ class mainWindow(QMainWindow):
         if filename:
             self.readData(filename)
             self.setDimsMets()
-            self.setPlotChoices()
+            #self.setPlotChoices()
             self.setFilters()
             self.widget_one.vis_type.activated.connect(self.visChoice)
             self.ret_label.setText(f'Data loaded from {self.filename}')
