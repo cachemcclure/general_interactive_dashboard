@@ -170,11 +170,84 @@ class mainWindow(QMainWindow):
         if filename:
             self.readData(filename)
             self.setDimsMets()
+            self.setPlotChoices()
             self.setFilters()
+            self.widget_one.vis_type.activated.connect(self.visChoice)
             self.ret_label.setText(f'Data loaded from {self.filename}')
             #print(self.dimensions)
             #print(self.metrics)
             #print(self.datetimes)
+        return
+    
+    
+    def visChoice(self):
+        self.visualization = self.widget_one.vis_type.currentText()
+        self.widget_one.primary_field_label.setVisible(False)
+        self.widget_one.primary_field_filter.setVisible(False)
+        self.widget_one.secondary_field_label.setVisible(False)
+        self.widget_one.secondary_field_filter.setVisible(False)
+        self.widget_one.primary_metric_label.setVisible(False)
+        self.widget_one.primary_metric_filter.setVisible(False)
+        self.widget_one.secondary_metric_label.setVisible(False)
+        self.widget_one.secondary_metric_filter.setVisible(False)
+        if self.visualization == 'Time-series':
+            self.widget_one.primary_field_label.setText('Choose date//time field:')
+            self.widget_one.primary_field_filter.clear()
+            self.widget_one.primary_field_filter.addItems(self.datetimes)
+            self.widget_one.primary_metric_label.setText('Choose metric field:')
+            self.widget_one.primary_metric_filter.clear()
+            self.widget_one.primary_metric_filter.addItems(self.metrics)
+            self.widget_one.secondary_metric_label.setText('Choose secondary metric field:')
+            self.widget_one.secondary_metric_filter.clear()
+            self.widget_one.secondary_metric_filter.addItems(self.metrics)
+            
+            self.widget_one.primary_field_label.setVisible(True)
+            self.widget_one.primary_field_filter.setVisible(True)
+            self.widget_one.primary_metric_label.setVisible(True)
+            self.widget_one.primary_metric_filter.setVisible(True)
+            self.widget_one.secondary_metric_label.setVisible(True)
+            self.widget_one.secondary_metric_filter.setVisible(True)
+        elif self.visualization == 'Pie Chart':
+            self.widget_one.primary_field_label.setText('Choose category field:')
+            self.widget_one.primary_field_filter.clear()
+            self.widget_one.primary_field_filter.addItems(self.dimensions)
+            self.widget_one.primary_metric_label.setText('Choose metric field:')
+            self.widget_one.primary_metric_filter.clear()
+            self.widget_one.primary_metric_filter.addItems(self.metrics)
+            
+            self.widget_one.primary_field_label.setVisible(True)
+            self.widget_one.primary_field_filter.setVisible(True)
+            self.widget_one.primary_metric_label.setVisible(True)
+            self.widget_one.primary_metric_filter.setVisible(True)
+        elif self.visualization == 'Bar Chart':
+            self.widget_one.primary_field_label.setText('Choose category field:')
+            self.widget_one.primary_field_filter.clear()
+            self.widget_one.primary_field_filter.addItems(self.dimensions)
+            self.widget_one.secondary_field_label.setText('Choose secondary category field:')
+            self.widget_one.secondary_field_filter.clear()
+            self.widget_one.secondary_field_filter.addItems(self.dimensions)
+            self.widget_one.primary_metric_label.setText('Choose metric field:')
+            self.widget_one.primary_metric_filter.clear()
+            self.widget_one.primary_metric_filter.addItems(self.metrics)
+            
+            self.widget_one.primary_field_label.setVisible(True)
+            self.widget_one.primary_field_filter.setVisible(True)
+            self.widget_one.secondary_field_label.setVisible(True)
+            self.widget_one.secondary_field_filter.setVisible(True)
+            self.widget_one.primary_metric_label.setVisible(True)
+            self.widget_one.primary_metric_filter.setVisible(True)
+        return
+    
+    
+    def setPlotChoices(self):
+        self.widget_one.primary_field_filter.addItem('No Selection')
+        self.widget_one.primary_field_filter.addItems(self.dimensions)
+        self.widget_one.secondary_field_filter.addItem('No Selection')
+        self.widget_one.secondary_field_filter.addItems(self.dimensions)
+        self.widget_one.primary_metric_filter.addItem('No Selection')
+        self.widget_one.primary_metric_filter.addItems(self.metrics)
+        self.widget_one.secondary_metric_filter.addItem('No Selection')
+        self.widget_one.secondary_metric_filter.addItems(self.metrics)
         return
     
     
@@ -550,7 +623,8 @@ class FilterWidget(QtWidgets.QWidget):
         vis_label = QtWidgets.QLabel()
         vis_label.setText('Report Type')
         self.vis_type = QtWidgets.QComboBox()
-        self.vis_type.addItems(['Time-series',
+        self.vis_type.addItems(['No Selection',
+                                'Time-series',
                                 'Pie Chart',
                                 'Bar Chart'])
         
@@ -707,6 +781,14 @@ class FilterWidget(QtWidgets.QWidget):
         layout.addWidget(self.filter_ten)
         
         ## Hide Filters and Labels at Init
+        self.primary_field_label.setVisible(False)
+        self.primary_field_filter.setVisible(False)
+        self.secondary_field_label.setVisible(False)
+        self.secondary_field_filter.setVisible(False)
+        self.primary_metric_label.setVisible(False)
+        self.primary_metric_filter.setVisible(False)
+        self.secondary_metric_label.setVisible(False)
+        self.secondary_metric_filter.setVisible(False)
         self.startDate1_label.setVisible(False)
         self.startDate1_filter.setVisible(False)
         self.endDate1_label.setVisible(False)
