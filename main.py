@@ -193,12 +193,15 @@ class mainWindow(QMainWindow):
         if self.visualization == 'Time-series':
             self.widget_one.primary_field_label.setText('Choose date//time field:')
             self.widget_one.primary_field_filter.clear()
+            self.widget_one.primary_field_filter.addItem('No Selection')
             self.widget_one.primary_field_filter.addItems(self.datetimes)
             self.widget_one.primary_metric_label.setText('Choose metric field:')
             self.widget_one.primary_metric_filter.clear()
+            self.widget_one.primary_metric_filter.addItem('No Selection')
             self.widget_one.primary_metric_filter.addItems(self.metrics)
             self.widget_one.secondary_metric_label.setText('Choose secondary metric field:')
             self.widget_one.secondary_metric_filter.clear()
+            self.widget_one.secondary_metric_filter.addItem('No Selection')
             self.widget_one.secondary_metric_filter.addItems(self.metrics)
             
             self.widget_one.primary_field_label.setVisible(True)
@@ -210,9 +213,11 @@ class mainWindow(QMainWindow):
         elif self.visualization == 'Pie Chart':
             self.widget_one.primary_field_label.setText('Choose category field:')
             self.widget_one.primary_field_filter.clear()
+            self.widget_one.primary_field_filter.addItem('No Selection')
             self.widget_one.primary_field_filter.addItems(self.dimensions)
             self.widget_one.primary_metric_label.setText('Choose metric field:')
             self.widget_one.primary_metric_filter.clear()
+            self.widget_one.primary_metric_filter.addItem('No Selection')
             self.widget_one.primary_metric_filter.addItems(self.metrics)
             
             self.widget_one.primary_field_label.setVisible(True)
@@ -222,12 +227,15 @@ class mainWindow(QMainWindow):
         elif self.visualization == 'Bar Chart':
             self.widget_one.primary_field_label.setText('Choose category field:')
             self.widget_one.primary_field_filter.clear()
+            self.widget_one.primary_field_filter.addItem('No Selection')
             self.widget_one.primary_field_filter.addItems(self.dimensions)
             self.widget_one.secondary_field_label.setText('Choose secondary category field:')
             self.widget_one.secondary_field_filter.clear()
+            self.widget_one.secondary_field_filter.addItem('No Selection')
             self.widget_one.secondary_field_filter.addItems(self.dimensions)
             self.widget_one.primary_metric_label.setText('Choose metric field:')
             self.widget_one.primary_metric_filter.clear()
+            self.widget_one.primary_metric_filter.addItem('No Selection')
             self.widget_one.primary_metric_filter.addItems(self.metrics)
             
             self.widget_one.primary_field_label.setVisible(True)
