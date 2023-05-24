@@ -423,6 +423,13 @@ class mainWindow(QMainWindow):
         for field in self.end_date_label_defs:
             self.end_date_label_defs[field].setVisible(False)
         return
+    
+    
+    def showPlot(self):
+        ## TODO: retrieve dimension and metric selections, visualization type, datetime filters, and dimension filters
+        ## TODO: switch function based on plot type selection
+        ## TODO: switch function based on number of dimension/metric selections
+        return
 
 
     def showPlot_test(self):
@@ -435,7 +442,7 @@ class mainWindow(QMainWindow):
         self.widget_two.browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
     
 
-    def showPlot(self):
+    def showPlot_old(self):
         try:
             self.filters['report'] = self.widget_one.report_type.currentText()
             self.filters['storefront_name'] = self.widget_one.storefront_filter.currentText()
@@ -837,13 +844,6 @@ class FilterWidget(QtWidgets.QWidget):
         self.filter_nine.setVisible(False)
         self.label_ten.setVisible(False)
         self.filter_ten.setVisible(False)
-        
-        
-    def setFilterVis(self,
-                     filters:list):
-        ## TODO: add parsing function to set filters
-        ## RETURN: dictionary of field names and filters
-        return
 
 
 ## Plotly Dashboard Panel
