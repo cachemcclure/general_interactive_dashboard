@@ -158,9 +158,9 @@ class mainWindow(QMainWindow):
         #print(state)
         #print(newDate.toString('yyyy-MM-dd'))
         if state == 'start':
-            self.filters['datetimes'][field]['start_date'] = newDate.toString("yyyy-MM-dd")
+            self.filters['datetimes'][field]['start_date'] = newDate.toPyDateTime()
         else:
-            self.filters['datetimes'][field]['end_date'] = newDate.toString("yyyy-MM-dd")
+            self.filters['datetimes'][field]['end_date'] = newDate.toPyDateTime()
     
 
     def retData(self):
@@ -174,6 +174,7 @@ class mainWindow(QMainWindow):
             self.setFilters()
             self.widget_one.vis_type.activated.connect(self.visChoice)
             self.ret_label.setText(f'Data loaded from {self.filename}')
+            self.visualization = 'No Selection'
             #print(self.dimensions)
             #print(self.metrics)
             #print(self.datetimes)
@@ -191,7 +192,7 @@ class mainWindow(QMainWindow):
         self.widget_one.secondary_metric_label.setVisible(False)
         self.widget_one.secondary_metric_filter.setVisible(False)
         if self.visualization == 'Time-series':
-            self.widget_one.primary_field_label.setText('Choose date//time field:')
+            self.widget_one.primary_field_label.setText('Choose date/time field:')
             self.widget_one.primary_field_filter.clear()
             self.widget_one.primary_field_filter.addItem('No Selection')
             self.widget_one.primary_field_filter.addItems(self.datetimes)
@@ -247,18 +248,6 @@ class mainWindow(QMainWindow):
         return
     
     
-    def setPlotChoices(self):
-        self.widget_one.primary_field_filter.addItem('No Selection')
-        self.widget_one.primary_field_filter.addItems(self.dimensions)
-        self.widget_one.secondary_field_filter.addItem('No Selection')
-        self.widget_one.secondary_field_filter.addItems(self.dimensions)
-        self.widget_one.primary_metric_filter.addItem('No Selection')
-        self.widget_one.primary_metric_filter.addItems(self.metrics)
-        self.widget_one.secondary_metric_filter.addItem('No Selection')
-        self.widget_one.secondary_metric_filter.addItems(self.metrics)
-        return
-    
-    
     def setFilters(self):
         self.filters = {'dimensions':{},
                         'metrics':{},
@@ -288,8 +277,8 @@ class mainWindow(QMainWindow):
                                                 'start_label':self.start_date_label_defs[iter],
                                                 'end_filter':self.end_date_filter_defs[iter],
                                                 'end_label':self.end_date_label_defs[iter],
-                                                'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
-                                                'end_date':datetime.today().strftime('%Y-%m-%d')}
+                                                'start_date':QtCore.QDateTime.currentDateTime().addYears(-1).toPyDateTime(),
+                                                'end_date':QtCore.QDateTime.currentDateTime().toPyDateTime()}
             self.filters['datetimes'][field]['start_label'].setText(f'Start {field}')
             self.filters['datetimes'][field]['start_label'].setVisible(True)
             self.filters['datetimes'][field]['start_filter'].setVisible(True)
@@ -348,6 +337,7 @@ class mainWindow(QMainWindow):
             [pl.col(column) for column in self.metrics]+\
             [pl.col(column).str.strptime(pl.Datetime) for column in self.datetimes])
         self.filtered_df = self.pldf
+        print(self.filtered_df.schema)
         return
     
     
@@ -404,8 +394,8 @@ class mainWindow(QMainWindow):
         
         for field in self.filters['datetimes']:
             temp_filter = self.filters['datetimes'][field]
-            temp_filter['start_filter'].setDate(QtCore.QDate.currentDate().addYears(-1))
-            temp_filter['end_filter'].setDate(QtCore.QDate.currentDate())
+            temp_filter['start_filter'].setDate(QtCore.QDateTime.currentDateTime().addYears(-1).toPyDateTime())
+            temp_filter['end_filter'].setDate(QtCore.QDateTime.currentDateTime().toPyDateTime())
         return
     
     
@@ -429,6 +419,53 @@ class mainWindow(QMainWindow):
         ## TODO: retrieve dimension and metric selections, visualization type, datetime filters, and dimension filters
         ## TODO: switch function based on plot type selection
         ## TODO: switch function based on number of dimension/metric selections
+        if self.visualization in ('Time-series','Pie chart','Bar chart'):
+            self.primary_dimension = self.widget_one.primary_field_filter.currentText()
+            self.secondary_dimension = self.widget_one.secondary_field_filter.currentText()
+            self.primary_metric = self.widget_one.primary_metric_filter.currentText()
+            self.secondary_metric = self.widget_one.secondary_metric_filter.currentText()
+            
+            date_fmt="%F"
+            for field in self.datetimes:
+                self.filtered_df = self.filtered_df.filter(
+                    pl.col(field).is_between(
+                        self.filters['datetimes'][field]['start_date'],
+                        self.filters['datetimes'][field]['end_date']
+                        )
+                    )
+            if self.visualization == 'Time-series':
+                if (self.primary_dimension != 'No Selection') \
+                    and (self.primary_metric != 'No Selection') \
+                    and (self.secondary_metric != 'No Selection'):
+                    ## TODO: add function to plot time-series with multiple metrics
+                    xx = 0
+                elif (self.primary_dimension != 'No Selection') \
+                    and (self.primary_metric != 'No Selection'):
+                    ## TODO: add function to plot time-series with single metric
+                    xx = 0
+                else:
+                    self.ret_label.setText('Please select at least 1 date/time and 1 metric')
+            elif self.visualization == 'Pie chart':
+                if (self.primary_dimension != 'No Selection') \
+                    and (self.primary_metric != 'No Selection'):
+                    ## TODO: add function to plot pie chart
+                    xx = 0
+                else:
+                    self.ret_label.setText('Please select at least 1 category and 1 metric')
+            elif self.visualization == 'Bar chart':
+                if (self.primary_dimension != 'No Selection') \
+                    and (self.secondary_dimension != 'No Selection') \
+                    and (self.primary_metric != 'No Selection'):
+                    ## TODO: add function to plot bar chart with multiple dimensions
+                    xx = 0
+                elif (self.primary_dimension != 'No Selection') \
+                    and (self.primary_metric != 'No Selection'):
+                    ## TODO: add function to plot bar chart with single dimension
+                    xx = 0
+                else:
+                    self.ret_label.setText('Please select at least 1 category and 1 metric')
+            else:
+                self.ret_label.setText('Please select a visualization type first!')
         return
 
 
