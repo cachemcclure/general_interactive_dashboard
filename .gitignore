@@ -7,3 +7,4 @@ Lib/*
 Scripts/*
 share/*
 pyvenv.cfg
+.idea/*
