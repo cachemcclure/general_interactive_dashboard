@@ -92,7 +92,6 @@ class mainWindow(QMainWindow):
                                        3:self.widget_one.startDate3_filter,
                                        4:self.widget_one.startDate4_filter,
                                        5:self.widget_one.startDate5_filter}
-        
         self.start_date_label_defs = {1:self.widget_one.startDate1_label,
                                       2:self.widget_one.startDate2_label,
                                       3:self.widget_one.startDate3_label,
@@ -221,6 +220,10 @@ class mainWindow(QMainWindow):
                                                    'end_label':self.end_date_label_defs[iter],
                                                    'start_date':(datetime.today()-relativedelta(years=1)).strftime('%Y-%m-%d'),
                                                    'end_date':datetime.today().strftime('%Y-%m-%d')}
+                self.filters['datetime'][field]['start_filter'].setDate(QtCore.QDate.currentDate().addYears(-1))
+                self.filters['datetime'][field]['start_label'].setText(f'Start: {field}')
+                self.filters['datetime'][field]['end_filter'].setDate(QtCore.QDate.currentDate())
+                self.filters['datetime'][field]['end_label'].setText(f'End: {field}')
                 iter += 1
         return
     
