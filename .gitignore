@@ -8,3 +8,4 @@ Scripts/*
 share/*
 pyvenv.cfg
 .idea/*
+bin/*

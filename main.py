@@ -4,8 +4,8 @@
 
 
 ## Import Modules
-from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt6 import QtCore, QtWidgets, QtWebEngineWidgets
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from pyqtgraph.dockarea import DockArea, Dock
 
 # from sqlalchemy import create_engine
