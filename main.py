@@ -142,7 +142,7 @@ class mainWindow(QMainWindow):
         self.ret_label = QtWidgets.QLabel(self)
         self.ret_label.setText("No Data")
         self.ret_label.setFixedHeight(30)
-        self.ret_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.ret_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         ## Export to CSV Button
         self.export_b = QtWidgets.QPushButton(self)
@@ -173,8 +173,7 @@ class mainWindow(QMainWindow):
             self.filters["datetimes"][field]["end_date"] = newDate.toPyDateTime()
 
     def retData(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
+        options = QFileDialog.Option.DontUseNativeDialog
         filename, _ = QFileDialog.getOpenFileName(
             self, "Choose data file", "", "All Files (*)", options=options
         )
@@ -1045,7 +1044,7 @@ def window():
     win = mainWindow()
     win.setWindowTitle("Interactive Dashboard Builder")
     win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
