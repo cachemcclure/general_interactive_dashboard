@@ -1,72 +1,51 @@
-## General Interactive Dashboard
-## A hopefully idiot-proof self-service reporting tool for the technically illiterate
-## Cache McClure
-
-
-## Import Modules
 from PyQt6 import QtCore, QtWidgets, QtWebEngineWidgets
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from pyqtgraph.dockarea import DockArea, Dock
-
-# from sqlalchemy import create_engine
 import pandas as pd
 import polars as pl
-
-# from pickle import load as pload
-# from pickle import dump as pdump
 import plotly.express as px
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 import dateutil.parser as parser
-
-# import re
-# from os.path import exists
 import sys
 
 
-## Classes
-## Dock Area
 class DockArea(DockArea):
-    ## This is to prevent the Dock from being resized
     def makeContainer(self, typ):
         new = super(DockArea, self).makeContainer(typ)
         new.setChildrenCollapsible(False)
         return new
 
 
-## Main Window
 class mainWindow(QMainWindow):
-    ## Initialize Class
     def __init__(self):
         super(mainWindow, self).__init__()
         self.initUI()
 
-    ## Initialize User Interface
     def initUI(self):
-        ## Initial Setup
+        # Initial Setup
         central_widget = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(self)
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-        ## Dock Area
+        # Dock Area
         dock_area = DockArea(self)
 
-        ## Dock 1
+        # Dock 1
         self.dock1 = Dock("Widget 1", size=(300, 500))
         self.dock1.hideTitleBar()
         dock_area.addDock(self.dock1)
 
-        ## Dock 2
+        # Dock 2
         self.dock2 = Dock("Widget 2", size=(400, 500))
         self.dock2.hideTitleBar()
         dock_area.addDock(self.dock2, "right", self.dock1)
 
-        ## Add Widgets
+        # Add Widgets
         self.widget_one = FilterWidget(self)
         self.widget_two = PlotlyWidget(self)
 
-        ## Filter and Label Defs
+        # Filter and Label Defs
         self.filter_defs = {
             1: self.widget_one.filter_one,
             2: self.widget_one.filter_two,
@@ -124,18 +103,18 @@ class mainWindow(QMainWindow):
             5: self.widget_one.endDate5_label,
         }
 
-        ## Buttons
-        ## Exit Button
+        # Buttons
+        # Exit Button
         self.exit_b = QtWidgets.QPushButton(self)
         self.exit_b.setText("Exit")
         self.exit_b.clicked.connect(self.close)
 
-        ## Plot Button
+        # Plot Button
         self.plot_b = QtWidgets.QPushButton(self)
         self.plot_b.setText("Plot")
         self.plot_b.clicked.connect(self.showPlot)
 
-        ## Retrieve Data Button
+        # Retrieve Data Button
         self.ret_b = QtWidgets.QPushButton(self)
         self.ret_b.setText("Retrieve Data")
         self.ret_b.clicked.connect(self.retData)
@@ -144,12 +123,12 @@ class mainWindow(QMainWindow):
         self.ret_label.setFixedHeight(30)
         self.ret_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        ## Export to CSV Button
+        # Export to CSV Button
         self.export_b = QtWidgets.QPushButton(self)
         self.export_b.setText("Export Plot Data to CSV")
         self.export_b.clicked.connect(self.exportCSV)
 
-        ## Formatting Dock Area
+        # Formatting Dock Area
         layout.addWidget(dock_area)
         layout.addWidget(self.ret_label)
         layout.addWidget(self.ret_b)
@@ -160,17 +139,14 @@ class mainWindow(QMainWindow):
         self.dock2.addWidget(self.widget_two)
         self.setGeometry(100, 100, 900, 600)
 
-        ## Connect Reset Filters button to Fx
+        # Connect Reset Filters button to Fx
         self.widget_one.reset_b.clicked.connect(self.resetFilters)
 
-    def onDateChange(self, field: str, state: str, newDate):
-        # print(field)
-        # print(state)
-        # print(newDate.toString('yyyy-MM-dd'))
+    def onDateChange(self, field: str, state: str, new_date):
         if state == "start":
-            self.filters["datetimes"][field]["start_date"] = newDate.toPyDateTime()
+            self.filters["datetimes"][field]["start_date"] = new_date.toPyDateTime()
         else:
-            self.filters["datetimes"][field]["end_date"] = newDate.toPyDateTime()
+            self.filters["datetimes"][field]["end_date"] = new_date.toPyDateTime()
 
     def retData(self):
         options = QFileDialog.Option.DontUseNativeDialog
@@ -185,9 +161,6 @@ class mainWindow(QMainWindow):
             self.widget_one.vis_type.activated.connect(self.visChoice)
             self.ret_label.setText(f"Data loaded from {self.filename}")
             self.visualization = "No Selection"
-            # print(self.dimensions)
-            # print(self.metrics)
-            # print(self.datetimes)
         return
 
     def visChoice(self):
@@ -262,7 +235,6 @@ class mainWindow(QMainWindow):
 
     def setFilters(self):
         self.filters = {"dimensions": {}, "metrics": {}, "datetimes": {}}
-        # self.widget_one.endDate_filter.dateChanged.connect(self.onEndDateChanged)
         iter = 1
         for dim in self.dimensions:
             if iter > 10:
@@ -806,14 +778,12 @@ class mainWindow(QMainWindow):
 
 ## Filter Panel
 class FilterWidget(QtWidgets.QWidget):
-    ## Initialize Class
     def __init__(self, parent):
         super(FilterWidget, self).__init__(parent)
         self.initWidget()
 
-    ## Initialize Widget Elements
     def initWidget(self):
-        ## Report Type
+        # Report Type
         vis_label = QtWidgets.QLabel()
         vis_label.setText("Report Type")
         self.vis_type = QtWidgets.QComboBox()
@@ -821,7 +791,7 @@ class FilterWidget(QtWidgets.QWidget):
             ["No Selection", "Time-series", "Pie Chart", "Bar Chart"]
         )
 
-        ## Report Fields
+        # Report Fields
         self.primary_field_label = QtWidgets.QLabel()
         self.primary_field_label.setText("Primary Dimension")
         self.primary_field_filter = QtWidgets.QComboBox()
@@ -835,7 +805,7 @@ class FilterWidget(QtWidgets.QWidget):
         self.secondary_metric_label.setText("Secondary Metric")
         self.secondary_metric_filter = QtWidgets.QComboBox()
 
-        ## Filters
+        # Filters
         self.filter_one = QtWidgets.QComboBox()
         self.filter_one.addItem("All")
         self.filter_two = QtWidgets.QComboBox()
@@ -877,49 +847,33 @@ class FilterWidget(QtWidgets.QWidget):
         self.endDate5_filter = QtWidgets.QDateEdit()
         self.endDate5_filter.setDate(QtCore.QDate.currentDate())
 
-        ## Labels
+        # Labels
         self.label_one = QtWidgets.QLabel()
-        # self.label_one.setText('Storefront')
         self.label_two = QtWidgets.QLabel()
-        # self.label_two.setText('Partner')
         self.label_three = QtWidgets.QLabel()
-        # self.label_three.setText('Brand')
         self.label_four = QtWidgets.QLabel()
-        # self.label_four.setText('Product Category')
         self.label_five = QtWidgets.QLabel()
-        # self.label_five.setText('Product Type')
         self.label_six = QtWidgets.QLabel()
-        # self.label_six.setText('Product Sub-type')
         self.label_seven = QtWidgets.QLabel()
-        # self.label_seven.setText('Order Type')
         self.label_eight = QtWidgets.QLabel()
-        # self.label_eight.setText('Order Status')
         self.label_nine = QtWidgets.QLabel()
-        # self.label_nine.setText('Order Status')
         self.label_ten = QtWidgets.QLabel()
-        # self.label_ten.setText('Order Status')
         self.startDate1_label = QtWidgets.QLabel()
-        # self.startDate_label.setText('Start Date')
         self.endDate1_label = QtWidgets.QLabel()
-        # self.endDate_label.setText('End Date')
         self.startDate2_label = QtWidgets.QLabel()
-        # self.startDate_label.setText('Start Date')
         self.endDate2_label = QtWidgets.QLabel()
-        # self.endDate_label.setText('End Date')
         self.startDate3_label = QtWidgets.QLabel()
-        # self.startDate_label.setText('Start Date')
         self.endDate3_label = QtWidgets.QLabel()
-        # self.endDate_label.setText('End Date')
         self.startDate4_label = QtWidgets.QLabel()
         self.endDate4_label = QtWidgets.QLabel()
         self.startDate5_label = QtWidgets.QLabel()
         self.endDate5_label = QtWidgets.QLabel()
 
-        ## Reset Button
+        # Reset Button
         self.reset_b = QtWidgets.QPushButton(self)
         self.reset_b.setText("Reset Filters")
 
-        ## Layout
+        # Layout
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.reset_b)
         layout.addWidget(vis_label)
@@ -973,7 +927,7 @@ class FilterWidget(QtWidgets.QWidget):
         layout.addWidget(self.label_ten)
         layout.addWidget(self.filter_ten)
 
-        ## Hide Filters and Labels at Init
+        # Hide Filters and Labels at Init
         self.primary_field_label.setVisible(False)
         self.primary_field_filter.setVisible(False)
         self.secondary_field_label.setVisible(False)
@@ -1024,21 +978,17 @@ class FilterWidget(QtWidgets.QWidget):
         self.filter_ten.setVisible(False)
 
 
-## Plotly Dashboard Panel
 class PlotlyWidget(QtWidgets.QWidget):
-    ## Initialize Class
     def __init__(self, parent):
         super(PlotlyWidget, self).__init__(parent)
         self.initWidget()
 
-    ## Initialize Widget Elements
     def initWidget(self):
         self.browser = QtWebEngineWidgets.QWebEngineView(self)
         vlayout = QtWidgets.QVBoxLayout(self)
         vlayout.addWidget(self.browser)
 
 
-## Main Function
 def window():
     app = QApplication(sys.argv)
     win = mainWindow()
