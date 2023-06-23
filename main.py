@@ -776,7 +776,6 @@ class mainWindow(QMainWindow):
             )
 
 
-## Filter Panel
 class FilterWidget(QtWidgets.QWidget):
     def __init__(self, parent):
         super(FilterWidget, self).__init__(parent)
